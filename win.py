@@ -13,7 +13,11 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtGui import QPixmap, QPainter, QPen, QImage
 from PyQt5.QtCore import Qt, QRect, QPoint
 
-TEMP_IMG = os.path.expanduser("~/temp_screenshot.png")
+# 临时截图文件
+if platform.system() == "Windows":
+    TEMP_IMG = os.path.join(os.environ['USERPROFILE'], "temp_screenshot.png")
+else:
+    TEMP_IMG = os.path.expanduser("~/temp_screenshot.png")
 
 
 # ================= 区域选择窗口 =================
@@ -107,7 +111,6 @@ def capture_area():
 
     QApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
     QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
-
     app = QApplication(sys.argv)
 
     # -------- macOS --------
@@ -120,21 +123,24 @@ def capture_area():
             return
 
         pixmap = QPixmap(TEMP_IMG)
+        win = PinWindow(pixmap)
+        win.show()
+        sys.exit(app.exec_())
 
     # -------- Windows --------
     else:
         selector = AreaSelector()
         selector.show()
 
-        while selector.isVisible():
-            app.processEvents()
+        # ✅ 直接运行主循环
+        app.exec_()
 
         if not selector.selection:
             return
 
-        # ⬇️ 关键：用 mss 截系统屏幕
         rect = selector.selection
 
+        # 截图
         with mss.mss() as sct:
             monitor = {
                 "left": rect.x(),
@@ -144,19 +150,13 @@ def capture_area():
             }
             sct_img = sct.grab(monitor)
 
-            img = Image.frombytes(
-                "RGB",
-                sct_img.size,
-                sct_img.rgb
-            )
-
+            img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
             img.save(TEMP_IMG)
 
         pixmap = QPixmap(TEMP_IMG)
-
-    win = PinWindow(pixmap)
-    win.show()
-    sys.exit(app.exec_())
+        win = PinWindow(pixmap)
+        win.show()
+        sys.exit(app.exec_())
 
 
 if __name__ == "__main__":
