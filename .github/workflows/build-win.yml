@@ -25,7 +25,7 @@ jobs:
 
       - name: Build exe
         run: |
-          pyinstaller -F -w --collect-all PyQt5 --collect-all mss win1.py
+          pyinstaller -F -w --collect-all PyQt5 --collect-all mss screenshot_simple.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

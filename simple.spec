@@ -1,9 +1,11 @@
 # -*- mode: python ; coding: utf-8 -*-
+# 简化版打包配置 - 专用于 screenshot_simple.py
+# 只需要 PyQt5，无需 mss 和 Pillow
 
 block_cipher = None
 
 a = Analysis(
-    ['win1.py'],
+    ['screenshot_simple.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -11,8 +13,6 @@ a = Analysis(
         'PyQt5.QtCore',
         'PyQt5.QtGui',
         'PyQt5.QtWidgets',
-        'mss',
-        'PIL',
     ],
     hookspath=[],
     hooksconfig={},
@@ -40,11 +40,11 @@ exe = EXE(
     upx=True,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # 不显示控制台窗口
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=None,  # 可以添加 .ico 图标文件路径
+    icon=None,
 )

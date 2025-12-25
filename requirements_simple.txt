@@ -1,0 +1,3 @@
+PyQt5>=5.15.0
+# mss 和 Pillow 不再需要，改用 PyQt5 自带功能
+
