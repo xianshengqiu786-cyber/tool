@@ -129,6 +129,13 @@ def capture_area():
 
     # -------- Windows --------
     else:
+        # Windows: 需要设置 DPI 感知
+        try:
+            import ctypes
+            ctypes.windll.shcore.SetProcessDpiAwareness(1)
+        except:
+            pass
+
         selector = AreaSelector()
         selector.show()
 
@@ -140,14 +147,29 @@ def capture_area():
 
         rect = selector.selection
 
-        # 截图
+        # 获取屏幕信息，处理多显示器情况
+        screen = QApplication.primaryScreen()
+        screen_geometry = screen.geometry()
+
+        # 截图 - 需要考虑 DPI 缩放
         with mss.mss() as sct:
+            # 获取主显示器信息
+            monitor = sct.monitors[1]  # monitors[0] 是虚拟屏幕，monitors[1] 是主显示器
+
+            # 计算实际坐标（考虑 DPI 缩放）
+            device_pixel_ratio = screen.devicePixelRatio()
+
             monitor = {
-                "left": rect.x(),
-                "top": rect.y(),
-                "width": rect.width(),
-                "height": rect.height(),
+                "left": int(rect.x() / device_pixel_ratio),
+                "top": int(rect.y() / device_pixel_ratio),
+                "width": int(rect.width() / device_pixel_ratio),
+                "height": int(rect.height() / device_pixel_ratio),
             }
+
+            # 确保坐标在有效范围内
+            monitor["left"] = max(0, monitor["left"])
+            monitor["top"] = max(0, monitor["top"])
+
             sct_img = sct.grab(monitor)
 
             img = Image.frombytes("RGB", sct_img.size, sct_img.rgb)
